@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Regression-Suite" verbose="1" parallel="methods" thread-count="4">
+    <test name="Regression-Tests">
+        <parameter name="cucumber.filter.tags" value="@regression"/>
+        <classes>
+            <class name="com.sky.web.runners.TestNGRunner"/>
+        </classes>
+    </test>
+</suite>
