@@ -6,7 +6,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import com.sky.web.config.ConfigReader;
 
@@ -31,15 +30,17 @@ import java.time.Duration;
 public abstract class BasePage {
 
     protected final WebDriverWait wait;
-    private final FluentWait<WebDriver> fluentWait;
 
     protected BasePage() {
         int timeoutSecs = ConfigReader.getExplicitWait();
-        this.wait = new WebDriverWait(DriverManager.get(), Duration.ofSeconds(timeoutSecs));
-        this.fluentWait = new FluentWait<>(DriverManager.get())
-                .withTimeout(Duration.ofSeconds(timeoutSecs))
-                .pollingEvery(Duration.ofMillis(500))
-                .ignoring(NoSuchElementException.class)
+        System.out.println("timeoutSecs: " + timeoutSecs);
+
+        this.wait = new WebDriverWait(
+                DriverManager.get(),
+                Duration.ofSeconds(timeoutSecs)
+        );
+
+        wait.ignoring(NoSuchElementException.class)
                 .ignoring(StaleElementReferenceException.class)
                 .ignoring(ElementNotInteractableException.class);
     }
@@ -52,7 +53,7 @@ public abstract class BasePage {
      */
     @Step("Click element: {locator}")
     protected void clickElement(By locator) {
-        fluentWait.until(ExpectedConditions.elementToBeClickable(locator)).click();
+        wait.until(ExpectedConditions.presenceOfElementLocated(locator)).click();
     }
 
     /**
@@ -61,7 +62,7 @@ public abstract class BasePage {
      */
     @Step("Type '{text}' into: {locator}")
     protected void typeText(By locator, String text) {
-        fluentWait.until(d -> {
+        wait.until(d -> {
             WebElement el = d.findElement(locator);
             if (!el.isDisplayed() || !el.isEnabled()) return null;
             el.clear();
@@ -72,12 +73,12 @@ public abstract class BasePage {
 
     /** Waits until the element is visible and returns it. */
     protected WebElement waitForVisible(By locator) {
-        return fluentWait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
     /** Waits until the element is clickable and returns it. */
     protected WebElement waitForClickable(By locator) {
-        return fluentWait.until(ExpectedConditions.elementToBeClickable(locator));
+        return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     /**
@@ -85,12 +86,12 @@ public abstract class BasePage {
      * Useful for confirming JS-driven state changes (e.g. aria-expanded="true").
      */
     protected void waitForAttributeContains(By locator, String attribute, String value) {
-        fluentWait.until(ExpectedConditions.attributeContains(locator, attribute, value));
+        wait.until(ExpectedConditions.attributeContains(locator, attribute, value));
     }
 
     /** Waits until element is visible and returns its trimmed text. */
     protected String getText(By locator) {
-        return fluentWait
+        return wait
                 .until(ExpectedConditions.visibilityOfElementLocated(locator))
                 .getText()
                 .trim();
@@ -98,7 +99,7 @@ public abstract class BasePage {
 
     /** Waits until at least one of the two locators becomes visible. */
     protected void waitForEither(By first, By second) {
-        fluentWait.until(d -> {
+        wait.until(d -> {
             try { if (d.findElement(first).isDisplayed()) return true; } catch (Exception ignored) {}
             try { if (d.findElement(second).isDisplayed()) return true; } catch (Exception ignored) {}
             return null;
@@ -108,7 +109,7 @@ public abstract class BasePage {
     /** Returns true if element becomes visible within timeout; false otherwise. Never throws. */
     protected boolean isVisible(By locator) {
         try {
-            fluentWait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
             return true;
         } catch (TimeoutException e) {
             return false;
@@ -121,14 +122,14 @@ public abstract class BasePage {
      */
     @Step("JS-click element: {locator}")
     protected void jsClick(By locator) {
-        WebElement el = fluentWait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
         ((JavascriptExecutor) DriverManager.get()).executeScript("arguments[0].click();", el);
     }
 
     /** Waits for a second window handle, then switches to it. */
     protected void switchToNewTab() {
         String original = DriverManager.get().getWindowHandle();
-        fluentWait.until(d -> d.getWindowHandles().size() > 1);
+        wait.until(d -> d.getWindowHandles().size() > 1);
         for (String handle : DriverManager.get().getWindowHandles()) {
             if (!handle.equals(original)) {
               DriverManager.get().switchTo().window(handle);
@@ -141,23 +142,23 @@ public abstract class BasePage {
 
     @Step("Click element")
     protected void click(WebElement element) {
-        fluentWait.until(ExpectedConditions.elementToBeClickable(element)).click();
+        wait.until(ExpectedConditions.elementToBeClickable(element)).click();
     }
 
     @Step("Type '{text}' into element")
     protected void type(WebElement element, String text) {
-        WebElement el = fluentWait.until(ExpectedConditions.visibilityOf(element));
+        WebElement el = wait.until(ExpectedConditions.visibilityOf(element));
         el.clear();
         el.sendKeys(text);
     }
 
     protected String getText(WebElement element) {
-        return fluentWait.until(ExpectedConditions.visibilityOf(element)).getText().trim();
+        return wait.until(ExpectedConditions.visibilityOf(element)).getText().trim();
     }
 
     protected boolean isDisplayed(WebElement element) {
         try {
-            return fluentWait.until(ExpectedConditions.visibilityOf(element)).isDisplayed();
+            return wait.until(ExpectedConditions.visibilityOf(element)).isDisplayed();
         } catch (TimeoutException | NoSuchElementException e) {
             return false;
         }

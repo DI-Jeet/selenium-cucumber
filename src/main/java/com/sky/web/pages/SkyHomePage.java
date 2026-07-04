@@ -1,6 +1,7 @@
 package com.sky.web.pages;
 
 import com.sky.web.config.ConfigReader;
+import com.sky.web.driver.DriverManager;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
@@ -11,10 +12,14 @@ public class SkyHomePage extends BasePage {
   private static final By SUGGESTIONS    = By.cssSelector("[role='list'][aria-label='Section containing links to TV, Films & Series']");
   private static final By NO_RESULTS     = By.xpath("//*[contains(text(),'no results')]");
   private static final By LOGIN_BUTTON   = By.cssSelector("[data-test-id='sign-in-link']");
+  private static final By ACCEPT_ALL = By.cssSelector("[title='Accept all']");
 
   @Step("Open Sky.com home page")
   public void open() {
       navigateTo(ConfigReader.getBaseUrl());
+      DriverManager.get().switchTo().frame(2);
+      clickElement(ACCEPT_ALL);
+      DriverManager.get().switchTo().defaultContent();
   }
 
   @Step("Click Login / Sign In button on home page")

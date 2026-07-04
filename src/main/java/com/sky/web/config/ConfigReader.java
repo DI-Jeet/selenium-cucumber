@@ -27,7 +27,7 @@ public class ConfigReader {
     }
 
     public static int getExplicitWait() {
-        return loader.getInt("explicit.wait.seconds", 20);
+        return loader.getInt("explicit.wait.seconds", 60);
     }
 
     public static int getPageLoadTimeout() {

@@ -144,7 +144,7 @@ base.url=https://sky.com
 browser=chrome
 execution.mode=local
 implicit.wait.seconds=10
-explicit.wait.seconds=20
+explicit.wait.seconds=90
 page.load.timeout.seconds=60
 ```
 
